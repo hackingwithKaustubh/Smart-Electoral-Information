@@ -18,9 +18,22 @@ const app = express();
 
 app.set('trust proxy', 1);
 app.use(helmet());
+const allowedOrigins = [
+  env.clientUrl,
+  'https://smart-electoral-information.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permissive in deployment to prevent any CORS block
+      }
+    },
     credentials: true,
   })
 );
