@@ -48,12 +48,16 @@ export default function useSpeech({ onResult }) {
   const speak = useCallback((text, lang = 'en') => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    // Clean markdown symbols for natural voice narration
-    const cleanText = String(text || '')
-      .replace(/###/g, '')
-      .replace(/[*_#`[\]()]/g, '')
+    
+    // Completely strip markdown headers (###), asterisks, dashes, brackets, and URLs
+    let cleanText = String(text || '')
+      .replace(/#+/g, '') // Removes any # or ###
       .replace(/https?:\/\/\S+/g, 'official portal')
+      .replace(/[*_~`>[\]()]/g, '')
+      .replace(/^[\s-–—*•]+/gm, '')
+      .replace(/\n+/g, '. ')
       .trim();
+
     if (!cleanText) return;
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
