@@ -42,6 +42,7 @@ export default function App() {
                 <Route element={<AppLayout />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="chat" element={<ChatPage />} />
+                  <Route path="chat/:conversationId" element={<ChatPage />} />
                   <Route path="information" element={<InformationHubPage />} />
                   <Route path="information/:slug" element={<InformationDetailPage />} />
                   <Route path="faqs" element={<FaqPage />} />
