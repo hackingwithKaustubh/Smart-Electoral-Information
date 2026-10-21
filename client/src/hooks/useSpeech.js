@@ -47,9 +47,18 @@ export default function useSpeech({ onResult }) {
 
   const speak = useCallback((text, lang = 'en') => {
     if (!window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
     window.speechSynthesis.cancel();
+    // Clean markdown symbols for natural voice narration
+    const cleanText = String(text || '')
+      .replace(/###/g, '')
+      .replace(/[*_#`[\]()]/g, '')
+      .replace(/https?:\/\/\S+/g, 'official portal')
+      .trim();
+    if (!cleanText) return;
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
   }, []);
 
