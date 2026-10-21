@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://civora-api.onrender.com/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://smart-electoral-information-zdp3.onrender.com/api',
   withCredentials: true,
 });
 
