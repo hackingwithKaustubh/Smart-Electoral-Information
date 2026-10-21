@@ -45,6 +45,14 @@ export default function useSpeech({ onResult }) {
     [onResult]
   );
 
+  const [speaking, setSpeaking] = useState(false);
+
+  const cancelSpeech = useCallback(() => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+  }, []);
+
   const speak = useCallback((text, lang = 'en') => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -63,8 +71,11 @@ export default function useSpeech({ onResult }) {
     utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  return { supported, listening, error, start, stop, speak };
+  return { supported, listening, speaking, error, start, stop, speak, cancelSpeech };
 }

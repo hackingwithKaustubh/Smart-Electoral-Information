@@ -114,6 +114,7 @@ export default function ChatPage() {
   );
 
   async function send(text) {
+    speech.cancelSpeech();
     const message = (text || input).trim();
     if (!message || sending) return;
     setSending(true);
@@ -340,7 +341,11 @@ export default function ChatPage() {
               className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent py-2 text-sm outline-none"
               placeholder="Ask about registration, eligibility, documents…"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                speech.cancelSpeech();
+                setInput(e.target.value);
+              }}
+              onFocus={() => speech.cancelSpeech()}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
