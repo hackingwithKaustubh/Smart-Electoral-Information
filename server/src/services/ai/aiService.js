@@ -9,7 +9,7 @@ const { buildContextWindow, inferFollowUpIntent } = require('./contextManager');
 const { buildSystemPrompt, buildUserPrompt } = require('./promptService');
 const { validateAssistantPayload, fallbackStructured } = require('./responseValidator');
 
-const MODEL = 'llama-3.3-70b-versatile';
+const MODEL = 'qwen/qwen3.8-27b';
 const HEURISTIC_THRESHOLD = 0.72;
 
 function getClient() {
