@@ -167,34 +167,50 @@ function structuredToMarkdown(structured) {
 }
 
 async function generateReply({ message, language, intent, history, knowledge }) {
-  const client = getClient();
-  const context = buildContextWindow(history);
-  const completion = await client.chat.completions.create({
-    model: MODEL,
-    temperature: 0.2,
-    max_tokens: 900,
-    messages: [
-      {
-        role: 'system',
-        content: buildSystemPrompt({
-          language,
-          knowledgeSnippets: knowledgeToText(knowledge),
-        }),
-      },
-      ...context.map((item) => ({
-        role: item.role === 'assistant' ? 'assistant' : 'user',
-        content: item.content,
-      })),
-      {
-        role: 'user',
-        content: buildUserPrompt({ message, intent, language }),
-      },
-    ],
-  });
+  let structured;
+  try {
+    const client = getClient();
+    const context = buildContextWindow(history);
+    const completion = await client.chat.completions.create({
+      model: MODEL,
+      temperature: 0.2,
+      max_tokens: 900,
+      messages: [
+        {
+          role: 'system',
+          content: buildSystemPrompt({
+            language,
+            knowledgeSnippets: knowledgeToText(knowledge),
+          }),
+        },
+        ...context.map((item) => ({
+          role: item.role === 'assistant' ? 'assistant' : 'user',
+          content: item.content,
+        })),
+        {
+          role: 'user',
+          content: buildUserPrompt({ message, intent, language }),
+        },
+      ],
+    });
 
-  const parsed = extractJson(completion.choices[0]?.message?.content || '');
-  const check = validateAssistantPayload(parsed);
-  const structured = check.ok ? parsed : fallbackStructured(language);
+    const parsed = extractJson(completion.choices[0]?.message?.content || '');
+    const check = validateAssistantPayload(parsed);
+    structured = check.ok ? parsed : fallbackStructured(language);
+  } catch (error) {
+    console.warn('Groq generation fallback triggered:', error.message);
+    structured = fallbackStructured(language);
+    // If we have retrieved database information, enhance the fallback with it
+    if (knowledge.info && knowledge.info.length > 0) {
+      const topInfo = knowledge.info[0];
+      structured.title = language === 'hi' ? (topInfo.titleHi || topInfo.title) : topInfo.title;
+      structured.summary = language === 'hi' ? (topInfo.summaryHi || topInfo.summary) : topInfo.summary;
+      if (topInfo.steps && topInfo.steps.length > 0) {
+        structured.steps = language === 'hi' ? (topInfo.stepsHi?.length ? topInfo.stepsHi : topInfo.steps) : topInfo.steps;
+      }
+    }
+  }
+
   return {
     structured,
     content: structuredToMarkdown(structured),
