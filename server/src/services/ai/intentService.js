@@ -57,8 +57,8 @@ const RULES = [
   },
   {
     intent: 'ELECTORAL_PROCESS',
-    patterns: [/how (do|does) vot/i, /evm/i, /vvpat/i, /polling/i, /booth/i, /मतदान प्रक्रिया/i],
-    weight: 0.8,
+    patterns: [/how (do|does|to) vot/i, /voting process/i, /evm/i, /vvpat/i, /polling/i, /booth/i, /मतदान/i],
+    weight: 0.88,
   },
   {
     intent: 'FAQ',
