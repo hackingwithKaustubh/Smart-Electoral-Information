@@ -27,6 +27,25 @@ const SUGGESTIONS = [
   'Where can I find official electoral information?',
 ];
 
+function getSpokenText(message) {
+  if (message.structured) {
+    const s = message.structured;
+    const parts = [];
+    if (s.title) parts.push(s.title);
+    if (s.summary) parts.push(s.summary);
+    (s.sections || []).forEach((sec) => {
+      if (sec.heading) parts.push(sec.heading);
+      (sec.bullets || []).forEach((b) => parts.push(b));
+    });
+    if (s.steps?.length) {
+      parts.push('Next steps:');
+      s.steps.forEach((st) => parts.push(st));
+    }
+    return parts.join('. ');
+  }
+  return String(message.content || '').replace(/#+/g, '').replace(/[*_~`>[\]()]/g, '');
+}
+
 function StructuredMessage({ structured, content }) {
   if (!structured) {
     return <p className="whitespace-pre-wrap text-sm leading-6">{content}</p>;
@@ -293,8 +312,19 @@ export default function ChatPage() {
                     <button type="button" onClick={() => saveMessage(message)}>
                       ♡ Save
                     </button>
-                    <button type="button" onClick={() => speech.speak(message.content, message.language)}>
-                      <Volume2 size={12} className="inline" /> Listen
+                    <button
+                      type="button"
+                      className={`hover:text-forest ${speech.speaking ? 'font-semibold text-forest' : ''}`}
+                      onClick={() => {
+                        if (speech.speaking) {
+                          speech.cancelSpeech();
+                        } else {
+                          speech.speak(getSpokenText(message), message.language);
+                        }
+                      }}
+                    >
+                      <Volume2 size={12} className="inline mr-1" />
+                      {speech.speaking ? 'Stop' : 'Listen'}
                     </button>
                   </>
                 )}
